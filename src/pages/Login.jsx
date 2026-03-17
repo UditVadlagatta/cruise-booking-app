@@ -143,6 +143,16 @@ const Login = () => {
               sign up
             </Link>
           </p>
+          <p className="mt-1 text-xs text-slate-500">
+                      Already have an account?{' '}
+                      <Link to="/celogin" className="text-amber-600 hover:text-amber-700 font-bold">
+                        Company Employee SIGN IN
+                      </Link>
+                      <span> or </span>
+                      <Link to="/cesignup" className="text-amber-600 hover:text-amber-700 font-bold">
+                                     SIGN UP
+                      </Link>
+                    </p>
         </div>
       </div>
     </div>

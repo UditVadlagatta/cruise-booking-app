@@ -187,10 +187,25 @@ const CESignup = () => {
 
         {/* Footer */}
         <div className="mt-8 pt-6 border-t text-center text-xs">
-          Already have an account?{" "}
+          <p>
+            Already have an account?{" "}
           <Link to="/celogin" className="text-amber-600 font-bold">
             EMPLOYEE SIGN IN
           </Link>
+          </p>
+          <div className='mt-1'>
+            <span>
+            Go for customer
+            <Link  to="/login" className="text-amber-600 font-bold"
+            > Customer Sign In</Link>
+          </span>
+          <span> or </span>
+          <span>
+            <Link  to="/login" className="text-amber-600 font-bold"
+            > Sign Up</Link>
+          </span>
+          </div>
+
         </div>
 
       </div>
