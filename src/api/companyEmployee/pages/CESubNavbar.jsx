@@ -50,6 +50,7 @@ const CESubNavbar = ({ worker }) => {
         >
           {isOpen ? "<" : ">"}
         </button>
+      
 
         {/* Sidebar */}
         <div

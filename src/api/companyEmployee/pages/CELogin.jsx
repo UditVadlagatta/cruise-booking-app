@@ -81,7 +81,7 @@ const CELogin = () => {
           {/* Email Field */}
           <div>
             <label className="block text-xs uppercase tracking-[0.3em] font-bold text-slate-700 mb-2 ml-1">
-              Work Email
+              Email
             </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

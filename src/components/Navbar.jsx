@@ -30,6 +30,7 @@ return (
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-12">
           <Link to="/" className="text-[10px] uppercase tracking-[0.4em] font-bold text-slate-500 hover:text-amber-600">Home</Link>
+          
           <Link to="/about" className="text-[10px] uppercase tracking-[0.4em] font-bold text-slate-500 hover:text-amber-600">About</Link>
           <Link to="/contact" className="text-[10px] uppercase tracking-[0.4em] font-bold text-slate-500 hover:text-amber-600">Contact</Link>
           
@@ -76,6 +77,7 @@ return (
         <div className="md:hidden bg-white border-b border-gray-100 flex flex-col p-6 space-y-4">
           <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-[15px] uppercase font-bold text-slate-600">Home</Link>
           <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-[15px] uppercase font-bold text-slate-600">About</Link>
+          <Link to="/contact"  onClick={() => setIsMenuOpen(false)} className="text-[15px] uppercase font-bold text-slate-600">Contact</Link>
           
           {/* {loggedInUser ? (
             <>
@@ -107,8 +109,8 @@ return (
   </>
 ) : (
   <div className="flex flex-col space-y-2">
-    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="bg-slate-900 text-white text-center text-[10px] py-3 rounded-full">Customer Login</Link>
-    <Link to="/celogin" onClick={() => setIsMenuOpen(false)} className="bg-slate-900 text-white text-center text-[10px] py-3 rounded-full">Employee Login</Link>
+    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="bg-slate-900 text-white text-center text-[10px] py-3 rounded-full">Login</Link>
+    {/* <Link to="/celogin" onClick={() => setIsMenuOpen(false)} className="bg-slate-900 text-white text-center text-[10px] py-3 rounded-full">Employee Login</Link> */}
   </div>
 )}
         </div>
