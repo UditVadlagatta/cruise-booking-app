@@ -52,7 +52,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="text-black max-w-6xl  pb-[110px]">
+    <div className="text-black max-w-6git branch -M mainxl  pb-[110px]">
       
       
       <header className="mb-16 flex justify-between  ">
