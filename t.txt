@@ -1,0 +1,116 @@
+import axios from "axios";
+import { environment } from "../env.jsx";
+import toast from "react-hot-toast";
+import { isTokenExpired } from "../utils/tokenUtils";
+
+axios.defaults.withCredentials = environment?.production;
+
+let isRedirecting = false;
+
+const handleLogout = () => {
+    if (isRedirecting) return;
+    isRedirecting = true;
+
+    localStorage.removeItem('token');
+    localStorage.removeItem("persist:root");
+    localStorage.removeItem('rememberedCredentials');
+    toast.error('Your session has expired. Please login again.');
+
+    setTimeout(() => {
+        isRedirecting = false;
+    }, 1000);   
+};
+
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            if (isTokenExpired(token)) {
+                handleLogout();
+                return Promise.reject(new Error('Token expired'));
+            }
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401 && error.message !== 'Token expired') {
+            handleLogout();
+        }
+        return Promise.reject(error);
+    }
+);
+
+
+// ==================== Regiter Api===================
+
+export const registerUser = async (data) => {
+    const url = `${environment.baseUrl}customer-users/register`;
+    try {
+        console.log('Register Data:', data);
+        const response = await axios.post(url, data)
+        return response.data
+
+    }
+    catch (err) {
+        console.log("==========error in Register User api file", err);
+        return err?.response?.data
+    }
+};
+
+export const getReferralHistory = async (params) => {
+    try {
+        const page = params?.p || 1;
+        const limit = params?.records || 10;
+        const status = params?.status || '';
+        const url = `${environment.baseUrl}customer-users/referral-history?page=${page}&limit=${limit}&status=${status}`;
+        const response = await axios.get(url);
+        return response.data;
+    } catch (err) {
+        console.error('Error fetching referral history:', err);
+        return err?.response?.data || { success: false, message: 'Failed to fetch referral history' };
+    }
+}
+
+export const loginUser = async (data) => {
+    const url = `${environment.baseUrl}auth/login`;
+    try {
+        const response = await axios.post(url, data)
+        return response.data
+    }
+    catch (err) {
+        console.log("==========error in login User api file", err);
+        return err?.response?.data
+    }
+};
+export const logoutUser = async (data) => {
+    const url = `${environment.baseUrl}auth/logout`;
+    try {
+        const response = await axios.post(url, data)
+        return response.data
+    }
+    catch (err) {
+        console.log("==========error in logout User api file", err);
+        return err?.response?.data
+    }
+};
+export const forgetUser = async (data) => {
+    const url = `${environment.baseUrl}customer-users/forgot-password`;
+    try {
+        const response = await axios.post(url, data)
+        return response.data
+    }
+    catch (err) {
+        console.log("==========error in forget User api file", err.response.data);
+        return err?.response?.data
+    }
+};
+
+src\api\index.jsx

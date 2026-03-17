@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+  /* Show only the invoice container and its children */
+  .max-w-4xl, .max-w-4xl * {
+    visibility: visible;
+  }
+  /* Position the invoice at the very top left of the printed page */
+  .max-w-4xl {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
