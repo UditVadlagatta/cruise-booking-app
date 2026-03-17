@@ -339,10 +339,13 @@ alert(res.message);
                       {bk.payment?.paymentProof ? (
                         <div className="relative group">
                           <img
-                            src={`http://localhost:5000/uploads/payments/${bk.payment.paymentProof}`}
+                            // src={`http://localhost:5000/uploads/payments/${bk.payment.paymentProof}`}
+                            src={bk.payment.paymentProof}
+onClick={() => window.open(bk.payment.paymentProof, "_blank")}
+
                             alt="Payment Proof"
                             className="w-full h-32 object-cover rounded-xl border border-slate-200 cursor-pointer group-hover:brightness-75 transition-all"
-                            onClick={() => window.open(`http://localhost:5000/uploads/payments/${bk.payment.paymentProof}`, "_blank")}
+                            // onClick={() => window.open(`http://localhost:5000/uploads/payments/${bk.payment.paymentProof}`, "_blank")}
                           />
                           <div className="mt-2 text-[11px] text-slate-500">
   <p>
