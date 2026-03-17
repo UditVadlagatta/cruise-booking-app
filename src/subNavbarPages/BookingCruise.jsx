@@ -87,11 +87,12 @@ const BookingCruise = () => {
                   alt="Cruise"
                   className="w-full md:w-56 h-48 md:h-auto object-cover"/> */}
                   <img
-  src={`${environment.staticurl}${cruise?.image}`}
+  // src={`${environment.staticurl}${cruise?.image}`}
+  src={cruise?.image || "https://images.unsplash.com/photo-1548574505-5e239809ee19?q=80&w=800&auto=format&fit=crop"}
   alt="Cruise"
   className="w-full md:w-56 h-48 md:h-auto object-cover"
 />
-{console.log("cruise image:", cruise?.image)}
+{/* {console.log("cruise image:", cruise?.image)} */}
                 <div className="p-6">
                   <div className="flex items-center gap-2 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-2">
                     <FaShip /> Cruise Details
