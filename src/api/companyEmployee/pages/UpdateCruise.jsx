@@ -169,7 +169,8 @@ const UpdateCruise = () => {
                 <div className="relative flex-1 min-h-[180px] border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center bg-gray-50 overflow-hidden group transition-all hover:border-blue-400">
                   {formData.image || cruise?.image ? (
                     <img
-                      src={formData.image ? URL.createObjectURL(formData.image) : `http://localhost:5000/uploads/${cruise.image}`}
+                      // src={formData.image ? URL.createObjectURL(formData.image) : `http://localhost:5000/uploads/${cruise.image}`}
+                      src={formData.image ? URL.createObjectURL(formData.image) : cruise.image}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
