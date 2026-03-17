@@ -39,10 +39,17 @@ const ProtectedRoute = ({ role }) => {
 
   const user = JSON.parse(localStorage.getItem('user'));
   const worker = JSON.parse(localStorage.getItem('worker'));
+  const admin =JSON.parse(localStorage.getItem('admin'));
 
   if (role === 'customer') {
     if (!user) {
       return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+  }
+
+  if (role === 'admin') {
+    if (!user || user?.role !== 'admin') {
+      return <Navigate to="/celogin" state={{ from: location }} replace />;
     }
   }
 

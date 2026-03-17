@@ -18,7 +18,6 @@ const CESubNavbar = ({ worker }) => {
 
   // 🔹 Check worker active status from backend
   useEffect(() => {
-
     const checkWorkerStatus = async () => {
       try {
 

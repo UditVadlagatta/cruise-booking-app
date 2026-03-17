@@ -11,7 +11,10 @@ const handleLogout = () => {
   isRedirecting = true;
 
   localStorage.clear();
-  window.location.href = "/login";
+  // window.location.href = "/login";
+  window.location.href = role === "admin" || role === "worker"
+    ? "/celogin"
+    : "/login";
 
   setTimeout(() => {
     isRedirecting = false;
@@ -52,17 +55,36 @@ api.interceptors.request.use(
 
       try {
         const rfToken = localStorage.getItem("refreshToken");
+        const role = localStorage.getItem("role"); // 'customer', 'worker', or 'admin'
         // console.log('rfToken: ',rfToken)
 
+        // const response = await axios.post(
+        //   `${environment.baseurl}/customers/refresh`,
+        //   {},
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${rfToken}`,
+        //     },
+        //   }
+        // );
+
+        // Pick the right refresh endpoint based on role
+    const refreshEndpoint =
+      role === "admin"
+        ? `${environment.baseurl}/admins/refresh`
+        : role === "worker"
+        ? `${environment.baseurl}/workers/refresh`
+        : `${environment.baseurl}/customers/refresh`;
         const response = await axios.post(
-          `${environment.baseurl}/customers/refresh`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${rfToken}`,
-            },
-          }
-        );
+      refreshEndpoint,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${rfToken}`,
+        },
+      }
+    );
+
 
         const { accessToken } = response.data;
 

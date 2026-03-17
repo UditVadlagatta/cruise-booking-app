@@ -1,42 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaLock } from 'react-icons/fa';
-import axios from 'axios'
-import api from '../api/index';
-import customerService from '../api/services/customerService';
-
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
-
-
-    // const [customers, setCustomers] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  // useEffect(()=>{ 
-  //   const fetchCustomers  = async ()=>{
-  //     setLoading(true);
-  //     setError('');
-
-  //     try{
-  //       const data  = await customerService.getAllCustomers()
-  //       setCustomers(data);
-  //     }
-  //     catch (err) {
-  //       console.error(err);
-  //       setError('Failed to fetch customers, server problem...');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };fetchCustomers();
-  // },[])
-  
-  
 
   const handleChange = (e) => {
     setFormData({
@@ -51,41 +24,38 @@ const Login = () => {
     setError('');
 
     try {
-    // ✅ Use 'api' instead of 'axios'
-    // This automatically uses the baseURL from your api/index.js
-    // const response = await api.post('/customers/login', {
-    //   email: formData.email,
-    //   password: formData.password
-    // });
-
-    const data = await  customerService.login(formData.email, formData.password);
-
-    const { accessToken, refreshToken, customer } = data;
-
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('user', JSON.stringify(customer));
-    
-
-    // trigger navbar update
-window.dispatchEvent(new Event("storage"));
-
-
-    navigate('/dashboard/profile');
-    
-  } catch (err) {
-    const errorMsg = err.response?.data?.message || 'Login failed. Please try again.';
-    setError(errorMsg);
-  } finally {
-    setLoading(false);
-  }
+      // Mock login - replace with actual API call
+      if (formData.username === 'admin' && formData.password === 'admin') {
+        const user = { username: 'admin', role: 'admin' };
+        const token = 'mock-jwt-token';
+        
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', token);
+        
+        navigate('/dashboard');
+      } else if (formData.username === 'user' && formData.password === 'user') {
+        const user = { username: 'user', role: 'customer' };
+        const token = 'mock-jwt-token';
+        
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', token);
+        
+        navigate('/dashboard');
+      } else {
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className=" bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4">
-      <div className="mt-30 mb-10 max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         {/* Header */}
-        <div className="text-center mb-8 ">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
             <FaUserCircle className="w-8 h-8 text-amber-600" />
           </div>
@@ -105,7 +75,7 @@ window.dispatchEvent(new Event("storage"));
 
           <div>
             <label className="block text-xs uppercase tracking-[0.3em] font-bold text-slate-700 mb-2">
-              Email
+              Username
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -113,11 +83,11 @@ window.dispatchEvent(new Event("storage"));
               </div>
               <input
                 type="text"
-                name="email"
-                value={formData.email}
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 className="w-full pl-10 pr-3 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                placeholder="Enter your email"
+                placeholder="Enter your username"
                 required
               />
             </div>
@@ -170,23 +140,9 @@ window.dispatchEvent(new Event("storage"));
           <p className="text-xs text-slate-600">
             Don't have an account?{' '}
             <Link to="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">
-              SIGN UP
+              sign up
             </Link>
           </p>
-           <p className="text-xs text-slate-600">
-            Don't have an account?{' '}
-            
-
-            <Link to="/celogin" className="text-amber-600 hover:text-amber-700 font-semibold">
-               Company Employee SIGN IN
-            </Link>
-            {/* <p>or</p> */} <span> or </span>
-            <Link to="/cesignup" className="text-amber-600 hover:text-amber-700 font-semibold">
-              SIGN UP
-            </Link>
-            
-          </p>
-          
         </div>
       </div>
     </div>
