@@ -70,6 +70,7 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="ceprofile"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 Profile
               </NavLink>
@@ -77,6 +78,7 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="ce-customer-dashboard"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 User Dashboard
               </NavLink>
@@ -84,6 +86,7 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="cecruiselist"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 Cruises List
               </NavLink>
@@ -91,6 +94,7 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="cecustomerlist"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 Customer List
               </NavLink>
@@ -98,6 +102,7 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="ce-all-bookings"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 All Bookings
               </NavLink>
@@ -105,18 +110,21 @@ const CESubNavbar = ({ worker }) => {
               <NavLink
                 to="ce-cruise-status"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 Booking Status
               </NavLink>
               <NavLink
                 to="ce-feedbacks"
                 className="block mt-6 hover:text-red-900"
+                onClick={()=>setIsOpen(false)}
               >
                 Feedbacks
               </NavLink>
               <NavLink
                   to="ce-contact"
-                    className="block mt-6 hover:text-red-900">
+                    className="block mt-6 hover:text-red-900"
+                    onClick={()=>setIsOpen(false)}>
                       Contact Us
               </NavLink>
 

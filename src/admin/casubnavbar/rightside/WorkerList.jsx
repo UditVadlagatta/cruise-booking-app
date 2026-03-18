@@ -36,20 +36,30 @@ const WorkerList = () => {
     };
 
     const toggleStatus = async (worker) => {
-    const newStatus = worker.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-    try {
-        const response = await workerService.update(worker._id, { status: newStatus });
-        setWorkers((prev) =>
-            prev.map((w) =>
-                w._id === worker._id
-                    ? response || { ...w, status: newStatus }
-                    : w
-            )
-        );
-    } catch (err) {
-        console.error("Failed to update worker status:", err);
-    }
-};
+        const newStatus = worker.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+        try {
+            const response = await workerService.update(worker._id, { status: newStatus });
+            setWorkers((prev) =>
+                prev.map((w) =>
+                    w._id === worker._id
+                        ? response || { ...w, status: newStatus }
+                        : w
+                )
+            );
+        } catch (err) {
+            console.error("Failed to update worker status:", err);
+        }
+    };
+
+    const deleteWorker = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this worker?")) return;
+        try {
+            await workerService.delete(id);
+            setWorkers((prev) => prev.filter((w) => w._id !== id));
+        } catch (err) {
+            console.error("Failed to delete worker:", err);
+        }
+    };
 
     const filteredWorkers = workers.filter((w) =>
         w.username?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,7 +84,7 @@ const WorkerList = () => {
                 <div className="relative flex-1 transform transition-all duration-300 group-focus-within:-translate-y-1">
                     <input
                         type="text"
-                        placeholder="Search workers..."
+                        placeholder="Search employees..."
                         className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-3 shadow-sm outline-none
                                    focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-300"
                         value={searchQuery || ""}
@@ -98,7 +108,7 @@ const WorkerList = () => {
                                 bg-white border border-gray-200 p-5 rounded-xl
                                 hover:shadow-lg hover:border-blue-400 transition-all duration-300">
 
-                                {/* ✅ status dot — uses status */}
+                                {/* Status dot */}
                                 <span className={`absolute top-3 left-3 inline-block w-2 h-2 rounded-full animate-pulse
                                     ${w.status === "ACTIVE"
                                         ? "bg-green-500 shadow-[0_0_8px_2px_rgba(34,197,94,0.8)]"
@@ -166,12 +176,32 @@ const WorkerList = () => {
                                             <input
                                                 type="checkbox"
                                                 className="sr-only peer"
-                                                checked={w.status === "ACTIVE"} // ✅ fixed
+                                                checked={w.status === "ACTIVE"}
                                                 onChange={() => toggleStatus(w)}
                                             />
                                             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
                                             <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
                                         </label>
+                                    )}
+
+                                    {/* Delete — admin only */}
+                                    {role === "admin" && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteWorker(w._id);
+                                            }}
+                                            className="text-gray-400 hover:text-red-500 transition"
+                                            title="Delete Worker"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="3 6 5 6 21 6"/>
+                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                                <path d="M10 11v6"/>
+                                                <path d="M14 11v6"/>
+                                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                            </svg>
+                                        </button>
                                     )}
                                 </div>
                             </div>

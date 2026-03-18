@@ -1,119 +1,120 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserShield, FaLock, FaEnvelope } from 'react-icons/fa';
 import workerService from '../../services/workerServices';
 import adminService from '../../services/adminService';
 
+/* ── Eye icons ── */
+const EyeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+const EyeOffIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+);
+
 const CELogin = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef(null);
+  const countdownRef = useRef(null);
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const storedWorker = localStorage.getItem("worker");
-  //   if (storedWorker && storedWorker !== "undefined") {
-  //     navigate('/cedashboard/ceprofile', { replace: true });
-  //   }
-  // }, [navigate]);
-
-
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   // Functional logic goes here later
-  //   // console.log("CE Login Attempted", formData);
-  //   setLoading(true);
-  //   setError('');
+  const handleTogglePassword = () => {
+    if (showPassword) {
+      setShowPassword(false);
+      setCountdown(0);
+      clearTimeout(timerRef.current);
+      clearInterval(countdownRef.current);
+      return;
+    }
 
-  //   try{
-  //     const data = await workerService.login(formData.email, formData.password);
-  //     // console.log(data);
-  //     const {accessToken , refreshToken , worker} = data;
+    setShowPassword(true);
+    setCountdown(10);
 
-  //     localStorage.setItem('token', accessToken);
-  //     localStorage.setItem('refreshToken',refreshToken);
-  //     localStorage.setItem('worker', JSON.stringify(worker));
+    timerRef.current = setTimeout(() => {
+      setShowPassword(false);
+      setCountdown(0);
+    }, 10000);
 
-  //     window.dispatchEvent(new Event("storage"));
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
-  //     navigate('/cedashboard/ceprofile');
-  //   }
-  //   catch(err){
-  //       const errorMsg = err.response?.data?.error || 'Login failed. Please try again.'
-  //       setError(errorMsg);
-  //   }
-  //   finally{
-  //     setLoading(false);
-  //   }
-
-  // };
+  useEffect(() => {
+    return () => {
+      clearTimeout(timerRef.current);
+      clearInterval(countdownRef.current);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    // 🔥 Try ADMIN login first
     try {
-      const data = await adminService.login(formData.email, formData.password);
+      // 🔥 Try ADMIN login first
+      try {
+        const data = await adminService.login(formData.email, formData.password);
+        const { accessToken, refreshToken, admin } = data;
 
-      const { accessToken, refreshToken, admin } = data;
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('role', 'admin');
+        localStorage.setItem('worker', JSON.stringify({ ...admin, role: 'admin' }));
+
+        window.dispatchEvent(new Event('storage'));
+        navigate('/admindashboard/aprofile');
+        return;
+      } catch (adminErr) {
+        // ❌ Admin failed → try worker
+      }
+
+      // 🔥 Try WORKER login
+      const data = await workerService.login(formData.email, formData.password);
+      const { accessToken, refreshToken, worker } = data;
 
       localStorage.setItem('token', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      // admin login
-localStorage.setItem('role', 'admin');
+      localStorage.setItem('role', 'worker');
+      localStorage.setItem('worker', JSON.stringify({ ...worker, role: 'worker' }));
 
-// worker login  
-localStorage.setItem('role', 'worker');
+      window.dispatchEvent(new Event('storage'));
+      navigate('/cedashboard/ceprofile');
 
-      // store as worker (unified)
-      localStorage.setItem('worker', JSON.stringify({ ...admin, role: "admin" }));
-
-      window.dispatchEvent(new Event("storage"));
-
-      // navigate('/admindashboard'); // ✅ admin redirect
-      navigate('/admindashboard/aprofile');
-      return;
-    } catch (adminErr) {
-      // ❌ If admin fails → try worker
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Invalid credentials (Admin/Worker)';
+      setError(errorMsg);
+    } finally {
+      setLoading(false);
     }
-
-    // 🔥 Try WORKER login
-    const data = await workerService.login(formData.email, formData.password);
-
-    const { accessToken, refreshToken, worker } = data;
-
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('worker', JSON.stringify({ ...worker, role: "worker" }));
-
-    window.dispatchEvent(new Event("storage"));
-
-    navigate('/cedashboard/ceprofile'); // ✅ worker redirect
-
-  } catch (err) {
-    const errorMsg =
-      err.response?.data?.error || "Invalid credentials (Admin/Worker)";
-    setError(errorMsg);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4">
       <div className="mt-30 mb-10 max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-        
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
@@ -133,7 +134,7 @@ localStorage.setItem('role', 'worker');
             </div>
           )}
 
-          {/* Email Field */}
+          {/* Email */}
           <div>
             <label className="block text-xs uppercase tracking-[0.3em] font-bold text-slate-700 mb-2 ml-1">
               Email
@@ -154,7 +155,7 @@ localStorage.setItem('role', 'worker');
             </div>
           </div>
 
-          {/* Password Field */}
+          {/* Password */}
           <div>
             <label className="block text-xs uppercase tracking-[0.3em] font-bold text-slate-700 mb-2 ml-1">
               Password
@@ -164,15 +165,39 @@ localStorage.setItem('role', 'worker');
                 <FaLock className="h-4 w-4 text-slate-400 group-focus-within:text-amber-500 transition-colors" />
               </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-10 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm"
+                className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-sm"
                 placeholder="••••••••"
                 required
               />
+
+              {/* Eye toggle — only when password has value */}
+              {formData.password && (
+                <button
+                  type="button"
+                  onClick={handleTogglePassword}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center gap-1 text-slate-400 hover:text-amber-600 transition-colors"
+                  title={showPassword ? 'Hide password' : 'Show password for 10s'}
+                >
+                  {showPassword && countdown > 0 && (
+                    <span className="text-[10px] font-bold text-amber-500 leading-none">
+                      {countdown}s
+                    </span>
+                  )}
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              )}
             </div>
+
+            {/* Helper text */}
+            {showPassword && (
+              <p className="mt-1.5 text-[11px] text-amber-500 font-medium">
+                Password visible · auto-hides in {countdown}s
+              </p>
+            )}
           </div>
 
           <button
@@ -187,7 +212,7 @@ localStorage.setItem('role', 'worker');
         {/* Footer Links */}
         <div className="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
           <p className="text-xs text-slate-500">
-            Employee ?{' '}
+            Employee?{' '}
             <Link to="/cesignup" className="text-amber-600 hover:text-amber-700 font-bold">
               GO TO SIGN UP
             </Link>
@@ -202,11 +227,11 @@ localStorage.setItem('role', 'worker');
               SIGN UP
             </Link>
           </p>
-          
           <p className="text-[10px] text-slate-400 italic">
             Authorized Personnel Only
           </p>
         </div>
+
       </div>
     </div>
   );

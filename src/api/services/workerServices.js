@@ -37,7 +37,7 @@ const workerService = {
 
   // 🔹 Delete Worker (optional)
   delete: async (id) => {
-    const response = await api.delete(`/workers/${id}`);
+    const response = await api.delete(`/workers/delete/${id}`);
     return response.data;
   }
 

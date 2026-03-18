@@ -34,6 +34,14 @@ const UsersIcon = () => (
     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
   </svg>
 );
+const TrashIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6"/>
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    <path d="M10 11v6"/><path d="M14 11v6"/>
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+  </svg>
+);
 
 /* ─── Avatar initials ────────────────────────────────────────── */
 const Avatar = ({ name }) => {
@@ -138,6 +146,16 @@ const CustomerList = () => {
     }
   };
 
+  const deleteCustomer = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this customer?')) return;
+    try {
+      await customerApi.deleteCustomer(id);
+      setCustomers(prev => prev.filter(c => c._id !== id));
+    } catch {
+      console.error('Failed to delete customer');
+    }
+  };
+
   const filtered = customers.filter(c =>
     c.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -172,7 +190,7 @@ const CustomerList = () => {
             </p>
           </div>
 
-          {/* Mini stat pills — desktop only */}
+          {/* Mini stat pills */}
           {!loading && (
             <div className="flex gap-2">
               <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">
@@ -229,7 +247,7 @@ const CustomerList = () => {
           )}
 
           {/* Customer cards */}
-          {!loading && filtered.map((custs, idx) => (
+          {!loading && filtered.map((custs) => (
             <div
               key={custs._id}
               className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-200"
@@ -269,27 +287,43 @@ const CustomerList = () => {
                   )}
                 </div>
 
-                {/* Active/inactive toggle */}
-                <div className="shrink-0 pt-0.5">
-                  <Toggle
-                    checked={custs.status === 'ACTIVE'}
-                    onChange={() => toggleStatus(custs)}
-                  />
-                </div>
+                {/* Active/inactive toggle — admin only */}
+                {role === 'admin' && (
+                  <div className="shrink-0 pt-0.5">
+                    <Toggle
+                      checked={custs.status === 'ACTIVE'}
+                      onChange={() => toggleStatus(custs)}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Bottom: Book button */}
-              <div className="mt-3 pt-3 border-t border-slate-100">
+              {/* Bottom: Book button + Delete (admin only) */}
+              <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
                 <button
                   onClick={e => {
                     e.stopPropagation();
                     navigate('/admindashboard/acustomerlist/acustomer-booking', { state: { custs } });
                   }}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold py-2.5 rounded-xl transition-all duration-150 shadow-sm shadow-blue-200"
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold py-2.5 rounded-xl transition-all duration-150 shadow-sm shadow-blue-200"
                 >
                   <BookIcon />
                   Book for this customer
                 </button>
+
+                {role === 'admin' && (
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      deleteCustomer(custs._id);
+                    }}
+                    className="flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 active:scale-[0.98] text-red-500 hover:text-red-600 border border-red-200 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all duration-150"
+                    title="Delete Customer"
+                  >
+                    <TrashIcon />
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

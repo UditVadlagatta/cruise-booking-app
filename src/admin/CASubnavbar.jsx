@@ -123,54 +123,63 @@ useEffect(() => {
             <NavLink
               to="aprofile"
               className="block mt-6 hover:text-red-900"
+              onClick={()=>setIsOpen(false)}
             >
               Profile
             </NavLink>
 
             <NavLink
             to="a-customer-dashboard"
-              className="block mt-6 hover:text-red-900">
+              className="block mt-6 hover:text-red-900"
+              onClick={()=>setIsOpen(false)}>
               DashBoard
             </NavLink>
 
             <NavLink
             to="auser"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
-              User List
+              Employee List
             </NavLink>
 
             <NavLink
             to="acustomerlist"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
               Customer List
             </NavLink>
 
             <NavLink
             to="a-cruiselist"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
               Cruise List
             </NavLink>
 
             <NavLink
             to="a-all-bookings"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
               All Bookings
             </NavLink>
 
             <NavLink
             to="a-cruise-status"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
                Booking Status
             </NavLink>
 
             <NavLink
             to="a-feedbacks"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
                Feedback
             </NavLink>
 
             <NavLink
             to="a-contact"
+            onClick={()=>setIsOpen(false)}
               className="block mt-6 hover:text-red-900">
                Contact Us
             </NavLink>

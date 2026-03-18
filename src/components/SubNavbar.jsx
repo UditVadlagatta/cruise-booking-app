@@ -87,7 +87,7 @@ const fetchProfile = async () => {
               to="profile"
               className="block mt-6 hover:text-red-900 "
               onClick={() =>{ fetchProfile();
-                // setIsOpen(false)
+                setIsOpen(false)
               }}
             >
               Profile 
@@ -96,7 +96,7 @@ const fetchProfile = async () => {
             <NavLink
               to="cruise"
               className="block mt-4 hover:text-red-900"
-              // onClick={() => setIsOpen(false)}
+              onClick={() => setIsOpen(false)}
             >
               Cruise Details
             </NavLink>
@@ -104,7 +104,7 @@ const fetchProfile = async () => {
             <NavLink
               to="booking"
               className="block mt-4 hover:text-red-900"
-              // onClick={() => setIsOpen(false)}
+              onClick={() => setIsOpen(false)}
             >
               Booking Status
             </NavLink>
@@ -112,7 +112,7 @@ const fetchProfile = async () => {
             <NavLink 
             to="payment"
             className="block mt-4 hover:text-red-900"
-            // onClick={()=>setIsOpen(false)}
+            onClick={()=>setIsOpen(false)}
             >
               Payment Status
             </NavLink> 

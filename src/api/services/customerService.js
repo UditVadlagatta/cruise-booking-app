@@ -25,6 +25,11 @@ customerListWithPassword: async () => {
     const response = await api.get('/customers/getall-with-password');
     return response.data;
 },
+deleteCustomer: async (id) => {
+        const response = await api.delete(`/customers/delete/${id}`);
+        return response.data;
+    },
+
 
 
   
