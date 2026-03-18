@@ -96,7 +96,7 @@ const AddCruise = () => {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-all mb-6 font-bold text-sm uppercase tracking-widest"
         >
-          <FaArrowLeft /> Back to Voyages
+          <FaArrowLeft /> Back to Cruises
         </button>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -174,10 +174,10 @@ const AddCruise = () => {
               </div>
 
               {/* Segments */}
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 <label className={labelStyle}>Route Segments</label>
                 {cruise.route.segments.map((seg, index) => (
-                  <div key={index} className="relative p-5 border border-slate-200 rounded-xl bg-white shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div key={index} className="mt-5 relative p-5 border border-slate-200 rounded-xl bg-white shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <span className="absolute -top-3 left-4 bg-white px-2 text-xs font-bold text-blue-600 uppercase">Segment {index + 1}</span>
                     <input type="text" name="from" placeholder="From Port" value={seg.from} onChange={(e) => handleRouteChange(index, e)} className={inputStyle} required />
                     <input type="text" name="to" placeholder="To Port" value={seg.to} onChange={(e) => handleRouteChange(index, e)} className={inputStyle} required />
@@ -200,7 +200,7 @@ const AddCruise = () => {
             {/* Pricing and Capacity */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               <div>
-                <label className={labelStyle}>Price ($)</label>
+                <label className={labelStyle}>Price (₹)</label>
                 <input type="number" name="price" value={cruise.price} onChange={handleChange} className={inputStyle} required />
               </div>
               <div>
@@ -211,7 +211,7 @@ const AddCruise = () => {
 
             <div className="pt-6">
               <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1 active:scale-[0.98]">
-                Create Cruise Voyage
+                Create Cruise 
               </button>
             </div>
           </form>
