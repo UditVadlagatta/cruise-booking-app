@@ -124,8 +124,15 @@ const createCruise = async (cruiseData) => {
     return updateCruise(id, imageFormData);
   };
 
+
+  const deleteCruise = async (id) => {
+  const res = await api.delete(`/cruises/delete/${id}`);
+  return res.data;
+}
+
     return {
     getAllCruises,
+    deleteCruise,
     updateCruise,
     createCruise,
     updateCruiseImage

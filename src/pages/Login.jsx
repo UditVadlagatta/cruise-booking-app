@@ -65,6 +65,7 @@ const Login = () => {
     localStorage.setItem('token', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(customer));
+    localStorage.setItem('role', 'customer');
     
 
     // trigger navbar update

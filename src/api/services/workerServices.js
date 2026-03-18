@@ -24,6 +24,10 @@ const workerService = {
     const response = await api.put(`/workers/update/${id}`, data);
     return response.data;
   },
+  workerListWithPassword: async () => {
+    const response = await api.get('/workers/getall-with-password');
+    return response.data;
+},
 
   // 🔹 Get All Workers (optional if needed)
   getAll: async () => {

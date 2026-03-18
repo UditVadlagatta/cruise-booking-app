@@ -25,10 +25,15 @@ const CESubNavbar = ({ worker }) => {
 
         const response = await workerService.getById(worker._id);
 
-        if (!response?.isActive) {
-          alert("Your account is deactive");
-          setIsActiveWorker(false);
-        }
+        // if (!response?.isActive) {
+        //   alert("Your account is deactive");
+        //   setIsActiveWorker(false);
+        // }
+        if (response?.status !== "ACTIVE") {
+    alert("Your account is deactivated");
+    setIsActiveWorker(false);
+}
+
 
       } catch (err) {
         console.error("Worker status check failed");
@@ -102,6 +107,17 @@ const CESubNavbar = ({ worker }) => {
                 className="block mt-6 hover:text-red-900"
               >
                 Booking Status
+              </NavLink>
+              <NavLink
+                to="ce-feedbacks"
+                className="block mt-6 hover:text-red-900"
+              >
+                Feedbacks
+              </NavLink>
+              <NavLink
+                  to="ce-contact"
+                    className="block mt-6 hover:text-red-900">
+                      Contact Us
               </NavLink>
 
             </>

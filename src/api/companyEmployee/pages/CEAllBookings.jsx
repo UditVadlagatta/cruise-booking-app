@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch, FaCalendarAlt, FaChair, FaShip, FaCheck, FaTimes, FaTrash, FaEdit, FaExternalLinkAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { bkService } from "../../services/bookingService";
 import { pmService } from "../../services/paymentService";
 
@@ -8,6 +8,16 @@ const CEAllBookings = () => {
   const navigate = useNavigate();
   const bookingApi = bkService();
   const paymentAPI = pmService();
+
+  // ✅ get role
+  const context = useOutletContext();
+  const currentUser = context?.worker || context?.admin;
+  const role = currentUser?.role;
+
+  // ✅ base path depending on role
+  const basePath = role === "admin"
+    ? "/admindashboard"
+    : "/cedashboard";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState([]);
@@ -60,7 +70,7 @@ const CEAllBookings = () => {
   };
 
   const deleteBooking = async (bookingCode) => {
-    if(!window.confirm("Are you sure you want to delete this booking?")) return;
+    if (!window.confirm("Are you sure you want to delete this booking?")) return;
     try {
       const res = await bookingApi.deleteBooking(bookingCode);
       alert(res.message);
@@ -95,13 +105,12 @@ const CEAllBookings = () => {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
             Customer <span className="text-indigo-600">Bookings</span>
           </h1>
-
           <div className="relative w-full md:w-80 group">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -158,12 +167,12 @@ const CEAllBookings = () => {
                 {/* DETAILS SECTION */}
                 <div className={`transition-all duration-500 overflow-hidden ${expandedId === bk._id ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"}`}>
                   <div className="px-4 md:px-5 pb-6 pt-2 border-t border-slate-50">
-                    
+
                     {/* INFO GRID */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-                      <DetailItem icon={<FaShip />} label="Cruise" value={bk.cruise?.name} />
-                      <DetailItem icon={<FaCalendarAlt />} label="Date" value={new Date(bk.travelDate).toLocaleDateString('en-GB')} />
-                      <DetailItem icon={<FaChair />} label="Seats" value={`${bk.seatsBooked} Person`} />
+                      <DetailItem icon={<FaShip />}        label="Cruise" value={bk.cruise?.name} />
+                      <DetailItem icon={<FaCalendarAlt />} label="Date"   value={new Date(bk.travelDate).toLocaleDateString('en-GB')} />
+                      <DetailItem icon={<FaChair />}       label="Seats"  value={`${bk.seatsBooked} Person`} />
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Route</p>
                         <p className="text-xs md:text-sm font-semibold text-slate-700 break-words">
@@ -179,7 +188,6 @@ const CEAllBookings = () => {
                           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Total Paid</p>
                           <p className="text-xl md:text-2xl font-black text-indigo-600">₹{bk.totalPrice}</p>
                         </div>
-
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Receipt</p>
                           {bk.payment?.paymentProof ? (
@@ -191,7 +199,6 @@ const CEAllBookings = () => {
                             </button>
                           ) : <span className="text-xs text-slate-300 italic">No proof uploaded</span>}
                         </div>
-
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Payment Status</p>
                           <div className="flex items-center gap-2">
@@ -211,13 +218,16 @@ const CEAllBookings = () => {
                       </div>
                     </div>
 
-                    {/* RESPONSIVE ACTION BUTTONS */}
+                    {/* ACTION BUTTONS */}
                     <div className="grid grid-cols-2 md:flex md:flex-wrap items-center justify-end gap-2 md:gap-3">
                       <ActionButton
                         icon={<FaEdit />}
                         label="Edit"
                         color="bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white"
-                        onClick={(e) => { e.stopPropagation(); navigate("/cedashboard/cecustomerlist/cecustomer-booking-edit",{ state:{ booking:bk }}); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`${basePath}/acustomerlist/acustomer-booking-edit`, { state: { booking: bk } });
+                        }}
                       />
                       <ActionButton
                         icon={<FaCheck />}
@@ -231,12 +241,16 @@ const CEAllBookings = () => {
                         color="bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-600 hover:text-white"
                         onClick={(e) => { e.stopPropagation(); cancelledBooking(bk.bookingCode); }}
                       />
-                      <ActionButton
-                        icon={<FaTrash />}
-                        label="Delete"
-                        color="bg-slate-50 text-slate-400 border border-slate-200 hover:bg-red-600 hover:text-white hover:border-red-600"
-                        onClick={(e) => { e.stopPropagation(); deleteBooking(bk.bookingCode); }}
-                      />
+
+                      {/* ✅ Delete — admin only */}
+                      {role === "admin" && (
+                        <ActionButton
+                          icon={<FaTrash />}
+                          label="Delete"
+                          color="bg-slate-50 text-slate-400 border border-slate-200 hover:bg-red-600 hover:text-white hover:border-red-600"
+                          onClick={(e) => { e.stopPropagation(); deleteBooking(bk.bookingCode); }}
+                        />
+                      )}
                     </div>
 
                   </div>
@@ -254,7 +268,6 @@ const CEAllBookings = () => {
   );
 };
 
-/* COMPONENT HELPERS */
 const DetailItem = ({ icon, label, value }) => (
   <div className="min-w-0">
     <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1 flex items-center gap-1.5 whitespace-nowrap">

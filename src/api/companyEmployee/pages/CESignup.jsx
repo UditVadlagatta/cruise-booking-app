@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserShield, FaLock, FaEnvelope, FaEye, FaEyeSlash, FaIdBadge } from 'react-icons/fa';
-import workerService from "../../services/workerServices"; // adjust path if needed
+import workerService from "../../services/workerServices";
+import adminService from "../../services/adminService";
 
 const CESignup = () => {
 
@@ -14,13 +15,14 @@ const CESignup = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // ✅ toggle: false = worker, true = admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const navigate = useNavigate();
 
-  // 👁 Temporary peek
   const togglePassword = () => {
     setShowPassword(true);
     setTimeout(() => setShowPassword(false), 5000);
@@ -36,7 +38,6 @@ const CESignup = () => {
     if (error) setError('');
   };
 
-  // 🚀 Submit Signup
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -45,8 +46,9 @@ const CESignup = () => {
       return;
     }
 
-    if (!formData.email.endsWith("@cruisebook.com")) {
-      setError("Email must be @cruisebook.com domain");
+    // ✅ only workers need @cruisebook.com
+    if (!isAdmin && !formData.email.endsWith("@cruisebook.com")) {
+      setError("Worker email must be @cruisebook.com domain");
       return;
     }
 
@@ -59,9 +61,14 @@ const CESignup = () => {
         password: formData.password
       };
 
-      const response = await workerService.create(payload);
-
-      alert("Employee registered successfully");
+      // ✅ call different service based on role toggle
+      if (isAdmin) {
+        await adminService.register(payload);
+        alert("Admin registered successfully");
+      } else {
+        await workerService.create(payload);
+        alert("Employee registered successfully");
+      }
 
       navigate("/celogin");
 
@@ -73,18 +80,50 @@ const CESignup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+    <div className="min-h-screen  bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4 py-12">
+      <div className="mt-10 max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
-            <FaUserShield className="w-8 h-8 text-slate-600" />
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 transition-colors duration-300
+            ${isAdmin ? "bg-amber-100" : "bg-slate-100"}`}>
+            <FaUserShield className={`w-8 h-8 transition-colors duration-300 ${isAdmin ? "text-amber-600" : "text-slate-600"}`} />
           </div>
           <h1 className="text-2xl font-serif text-slate-900 mb-2">
-            Employee <span className="text-amber-600 italic">Registration</span>
+            {isAdmin ? "Admin" : "Employee"}{" "}
+            <span className="text-amber-600 italic">Registration</span>
           </h1>
-          <p className="text-sm text-slate-500">Create a staff account</p>
+          <p className="text-sm text-slate-500">
+            {isAdmin ? "Create an admin account" : "Create a staff account"}
+          </p>
+        </div>
+
+        {/* ✅ Role Toggle */}
+        <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-6">
+          <div>
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">
+              Register as Admin
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">
+              {isAdmin ? "Admin account will be created" : "Worker account will be created"}
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={isAdmin}
+              onChange={() => {
+                setIsAdmin(!isAdmin);
+                setError('');
+                setFormData({ username: '', email: '', password: '', confirmPassword: '' });
+              }}
+            />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full
+                peer peer-checked:bg-amber-500 transition-colors"></div>
+            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full
+                transition-transform peer-checked:translate-x-5"></div>
+          </label>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -98,7 +137,7 @@ const CESignup = () => {
           {/* Username */}
           <div>
             <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-1">
-              Staff Username
+              {isAdmin ? "Admin Username" : "Staff Username"}
             </label>
             <div className="relative group">
               <FaIdBadge className="absolute left-3 top-3 text-slate-400"/>
@@ -106,9 +145,9 @@ const CESignup = () => {
                 type="text"
                 name="username"
                 value={formData.username}
-                placeholder="Staff ID or Name"
+                placeholder={isAdmin ? "Admin name" : "Staff ID or Name"}
                 onChange={handleChange}
-                className="w-full pl-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
                 required
               />
             </div>
@@ -117,7 +156,7 @@ const CESignup = () => {
           {/* Email */}
           <div>
             <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-1">
-              Work Email
+              {isAdmin ? "Admin Email" : "Work Email"}
             </label>
             <div className="relative group">
               <FaEnvelope className="absolute left-3 top-3 text-slate-400"/>
@@ -125,12 +164,17 @@ const CESignup = () => {
                 type="email"
                 name="email"
                 value={formData.email}
-                placeholder="employee@cruisebook.com"
+                placeholder={isAdmin ? "admin@gmail.com" : "employee@cruisebook.com"}
                 onChange={handleChange}
-                className="w-full pl-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
                 required
               />
             </div>
+            {!isAdmin && (
+              <p className="text-[10px] text-slate-400 mt-1 ml-1">
+                Must be @cruisebook.com domain
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -145,7 +189,7 @@ const CESignup = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
                 required
               />
               <button type="button" onClick={togglePassword} className="absolute right-3 top-3 text-slate-400">
@@ -166,7 +210,7 @@ const CESignup = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
                 required
               />
               <button type="button" onClick={toggleConfirmPassword} className="absolute right-3 top-3 text-slate-400">
@@ -179,33 +223,33 @@ const CESignup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 text-white py-4 rounded-lg hover:bg-amber-700 transition"
+            className={`w-full text-white py-4 rounded-lg transition font-bold text-sm tracking-widest uppercase
+              ${isAdmin
+                ? "bg-amber-600 hover:bg-amber-700"
+                : "bg-slate-900 hover:bg-amber-700"
+              } disabled:opacity-50`}
           >
-            {loading ? "Creating Staff Account..." : "Register Employee"}
+            {loading
+              ? "Creating Account..."
+              : isAdmin ? "Register Admin" : "Register Employee"
+            }
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-8 pt-6 border-t text-center text-xs">
+        <div className="mt-8 pt-6 border-t text-center text-xs space-y-2">
           <p>
             Already have an account?{" "}
-          <Link to="/celogin" className="text-amber-600 font-bold">
-            EMPLOYEE SIGN IN
-          </Link>
+            <Link to="/celogin" className="text-amber-600 font-bold">
+              EMPLOYEE SIGN IN
+            </Link>
           </p>
-          <div className='mt-1'>
-            <span>
-            Go for customer
-            <Link  to="/login" className="text-amber-600 font-bold"
-            > Customer Sign In</Link>
-          </span>
-          <span> or </span>
-          <span>
-            <Link  to="/login" className="text-amber-600 font-bold"
-            > Sign Up</Link>
-          </span>
+          <div>
+            <span>Go for customer </span>
+            <Link to="/login" className="text-amber-600 font-bold">Customer Sign In</Link>
+            <span> or </span>
+            <Link to="/signup" className="text-amber-600 font-bold">Sign Up</Link>
           </div>
-
         </div>
 
       </div>

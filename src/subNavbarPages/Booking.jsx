@@ -86,11 +86,11 @@ const Booking = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24">
+    <div className="min-h-screen bg-white pb-24">
       <div className="max-w-5xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
         <header className="mb-8 md:mb-12">
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-            My Voyages
+            My Cruises
           </h1>
           <p className="text-slate-500 text-sm md:text-base mt-1">Manage your nautical adventures.</p>
         </header>

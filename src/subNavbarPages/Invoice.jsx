@@ -1,3 +1,4 @@
+import React from "react";
 // import React from "react";
 // import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 // import { FaArrowLeft, FaPrint } from "react-icons/fa";
@@ -171,7 +172,9 @@
 // );
 
 // export default Invoice;
-import React from "react";
+
+
+// import React from "react";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { FaArrowLeft, FaPrint } from "react-icons/fa";
 import { environment } from "../api/env";
@@ -184,11 +187,8 @@ const Invoice = () => {
 
   if (!booking) return <div className="p-10 text-center text-slate-500">No Invoice Data</div>;
 
-  // ... (Keep your duration logic here) ...
-
   /* -------- Duration Calculation From Segments -------- */
   const segments = booking.cruise?.route?.segments || [];
-
   let durationMinutes = 0;
   let startAdding = false;
 
@@ -202,14 +202,6 @@ const Invoice = () => {
   const minutes = durationMinutes % 60;
   const duration = hours > 0 ? `${hours} hr ${minutes} min` : `${minutes} min`;
 
-  /* -------- Payment Status Color -------- */
-  const paymentStatusColor =
-    booking.payment?.status === "SUCCESS"
-      ? "text-emerald-600"
-      : booking.payment?.status === "PENDING"
-      ? "text-amber-500"
-      : "text-rose-500";
-
   /* -------- Booking Status Badge -------- */
   const bookingBadgeColor =
     booking.status === "CONFIRMED"
@@ -218,14 +210,20 @@ const Invoice = () => {
       ? "bg-amber-100 text-amber-700"
       : "bg-rose-100 text-rose-700";
 
-  // const bookingBadgeColor = booking.status === "CONFIRMED" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700";
+  /* -------- Payment Status -------- */
+  const paymentStatus = booking.payment?.status || "PENDING";
+  const paymentBadgeColor =
+    paymentStatus === "SUCCESS"
+      ? "bg-emerald-100 text-emerald-700"
+      : paymentStatus === "PENDING"
+      ? "bg-amber-100 text-amber-700"
+      : "bg-rose-100 text-rose-700";
 
   return (
-    /* Removed high padding here to allow the parent to control the space */
     <div className="w-full bg-slate-50 min-h-screen pb-10 print:bg-white print:pb-0">
       <div className="max-w-4xl mx-auto w-full">
-        
-        {/* Back Button - Smaller for mobile */}
+
+        {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-4 px-2 font-medium print:hidden"
@@ -234,8 +232,8 @@ const Invoice = () => {
         </button>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden print:shadow-none print:border-none">
-          
-          {/* Header - Stacks on mobile */}
+
+          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start p-4 sm:p-8 border-b border-slate-100 bg-slate-50 gap-3">
             <div className="w-full">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CRUISEbook</p>
@@ -244,81 +242,104 @@ const Invoice = () => {
                 ID: <span className="font-mono font-bold text-slate-700">{booking.bookingCode}</span>
               </p>
             </div>
-            <div className="flex sm:flex-col justify-between items-center sm:items-end w-full sm:w-auto">
-              <p className="text-[10px] sm:text-sm text-slate-500">{new Date().toLocaleDateString()}</p>
-              <span className={`px-2 py-0.5 mt-1 rounded-full text-[9px] sm:text-xs font-bold ${bookingBadgeColor}`}>
-                {booking.status}
+            <div className="flex sm:flex-col justify-between items-center sm:items-end w-full sm:w-auto gap-2">
+              <p className="text-[10px] sm:text-sm text-slate-500">{new Date().toLocaleDateString('en-GB')}</p>
+              {/* ✅ Booking status */}
+              <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-bold ${bookingBadgeColor}`}>
+                <span>BK:{ booking.status}</span>
               </span>
+              {/* ✅ Payment status */}
+              {/* <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-bold ${paymentBadgeColor}`}>
+                PM: {paymentStatus}
+              </span> */}
             </div>
           </div>
 
-          
-          
-         <div className="border-b border-slate-100 overflow-hidden">
-  <img
-    src={
-      booking.cruise?.image
-        ? `${environment.staticurl}${booking.cruise.image}`
-        : "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-    }
-    alt="Cruise"
-    /* h-32: Small height for mobile
-       sm:h-64: Larger height for desktop
-       object-cover: Ensures the image fills the area without stretching
-    */
-    className="w-full h-32 sm:h-64 object-cover"
-    onError={(e) => {
-      e.target.onerror = null; // Prevents infinite loops if fallback also fails
-      e.target.src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-    }}
-  />
-</div>
-
-
+          {/* Cruise Image */}
+          <div className="border-b border-slate-100 overflow-hidden">
+            <img
+              src={
+                booking.cruise?.image
+                  ? `${environment.staticurl}${booking.cruise.image}`
+                  : "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+              }
+              alt="Cruise"
+              className="w-full h-32 sm:h-64 object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+              }}
+            />
+          </div>
 
           <div className="p-4 sm:p-8 space-y-6">
-            {/* Details Grid - Single column on mobile */}
+
+            {/* Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* Customer */}
               <section>
                 <p className="text-[10px] font-black text-slate-400 uppercase border-b pb-1 mb-3">Customer</p>
                 <div className="space-y-2">
-                  <DetailRow label="Name" value={customer?.username} />
+                  <DetailRow label="Name"  value={customer?.username} />
                   <DetailRow label="Email" value={customer?.email} />
                 </div>
               </section>
 
+              {/* Travel */}
               <section>
                 <p className="text-[10px] font-black text-slate-400 uppercase border-b pb-1 mb-3">Travel</p>
                 <div className="space-y-2">
-                  <DetailRow label="Cruise" value={booking.cruise?.name} highlight />
-                  <DetailRow label="From" value={booking.boardingPoint} />
-                  <DetailRow label="To" value={booking.dropPoint} />
+                  <DetailRow label="Cruise"    value={booking.cruise?.name} highlight />
+                  <DetailRow label="From"      value={booking.boardingPoint} />
+                  <DetailRow label="To"        value={booking.dropPoint} />
+                  <DetailRow label="Duration"  value={duration} />
+                  <DetailRow label="Date"      value={new Date(booking.travelDate).toLocaleDateString('en-GB')} />
+                  <DetailRow label="Seats"     value={`${booking.seatsBooked} Person`} />
                 </div>
               </section>
+
             </div>
 
-            {/* Fare Summary - Horizontal Scroll for Table */}
+            {/* Payment Info */}
+            <section>
+              <p className="text-[10px] font-black text-slate-400 uppercase border-b pb-1 mb-3">Payment</p>
+              <div className="space-y-2">
+                <DetailRow label="Payment Status" value={paymentStatus} />
+                <DetailRow label="Amount Paid"    value={`₹${booking.totalPrice?.toLocaleString()}`} highlight />
+              </div>
+            </section>
+
+            {/* Fare Table */}
             <div className="mt-4">
-              <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Fare</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Fare Summary</p>
               <div className="overflow-x-auto rounded-lg border border-slate-100">
                 <table className="w-full text-xs min-w-[300px]">
                   <thead className="bg-slate-800 text-white">
                     <tr>
                       <th className="p-3 text-left">Item</th>
+                      <th className="p-3 text-center">Seats</th>
                       <th className="p-3 text-right">Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     <tr>
-                      <td className="p-3">{booking.cruise?.name} (x{booking.seatsBooked})</td>
+                      <td className="p-3">{booking.cruise?.name}</td>
+                      <td className="p-3 text-center">x{booking.seatsBooked}</td>
                       <td className="p-3 text-right font-bold">₹{booking.totalPrice?.toLocaleString()}</td>
                     </tr>
                   </tbody>
+                  <tfoot className="bg-slate-50">
+                    <tr>
+                      <td colSpan={2} className="p-3 text-right text-xs font-black text-slate-500 uppercase">Grand Total</td>
+                      <td className="p-3 text-right font-black text-indigo-600">₹{booking.totalPrice?.toLocaleString()}</td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
 
-            {/* Print Button - Stays at bottom */}
+            {/* Print Button */}
             <div className="pt-4 print:hidden">
               <button
                 onClick={() => window.print()}
@@ -327,6 +348,7 @@ const Invoice = () => {
                 <FaPrint /> Print Invoice
               </button>
             </div>
+
           </div>
         </div>
       </div>
@@ -342,5 +364,6 @@ const DetailRow = ({ label, value, highlight }) => (
     </span>
   </div>
 );
+
 
 export default Invoice;

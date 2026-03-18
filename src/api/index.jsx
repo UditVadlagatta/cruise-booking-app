@@ -9,6 +9,8 @@ const handleLogout = () => {
   if (isRedirecting) return;
 
   isRedirecting = true;
+  const role = localStorage.getItem("role");
+
 
   localStorage.clear();
   // window.location.href = "/login";

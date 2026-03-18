@@ -117,12 +117,12 @@ const fetchProfile = async () => {
               Payment Status
             </NavLink> 
 
-            {/* <NavLink
-            to="invoice"
+            <NavLink
+            to="ce-feedback"
             className="block mt-4 hover:text-red-900"
             >
-              Invoice
-            </NavLink> */}
+              Feedback
+            </NavLink>
           </>
         )}
       </div>

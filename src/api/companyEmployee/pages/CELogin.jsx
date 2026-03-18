@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserShield, FaLock, FaEnvelope } from 'react-icons/fa';
 import workerService from '../../services/workerServices';
+import adminService from '../../services/adminService';
 
 const CELogin = () => {
   const [formData, setFormData] = useState({
@@ -25,35 +26,89 @@ const CELogin = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Functional logic goes here later
-    console.log("CE Login Attempted", formData);
-    setLoading(true);
-    setError('');
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   // Functional logic goes here later
+  //   // console.log("CE Login Attempted", formData);
+  //   setLoading(true);
+  //   setError('');
 
-    try{
-      const data = await workerService.login(formData.email, formData.password);
-      // console.log(data);
-      const {accessToken , refreshToken , worker} = data;
+  //   try{
+  //     const data = await workerService.login(formData.email, formData.password);
+  //     // console.log(data);
+  //     const {accessToken , refreshToken , worker} = data;
+
+  //     localStorage.setItem('token', accessToken);
+  //     localStorage.setItem('refreshToken',refreshToken);
+  //     localStorage.setItem('worker', JSON.stringify(worker));
+
+  //     window.dispatchEvent(new Event("storage"));
+
+  //     navigate('/cedashboard/ceprofile');
+  //   }
+  //   catch(err){
+  //       const errorMsg = err.response?.data?.error || 'Login failed. Please try again.'
+  //       setError(errorMsg);
+  //   }
+  //   finally{
+  //     setLoading(false);
+  //   }
+
+  // };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  try {
+    // 🔥 Try ADMIN login first
+    try {
+      const data = await adminService.login(formData.email, formData.password);
+
+      const { accessToken, refreshToken, admin } = data;
 
       localStorage.setItem('token', accessToken);
-      localStorage.setItem('refreshToken',refreshToken);
-      localStorage.setItem('worker', JSON.stringify(worker));
+      localStorage.setItem('refreshToken', refreshToken);
+      // admin login
+localStorage.setItem('role', 'admin');
+
+// worker login  
+localStorage.setItem('role', 'worker');
+
+      // store as worker (unified)
+      localStorage.setItem('worker', JSON.stringify({ ...admin, role: "admin" }));
 
       window.dispatchEvent(new Event("storage"));
 
-      navigate('/cedashboard/ceprofile');
-    }
-    catch(err){
-        const errorMsg = err.response?.data?.error || 'Login failed. Please try again.'
-        setError(errorMsg);
-    }
-    finally{
-      setLoading(false);
+      // navigate('/admindashboard'); // ✅ admin redirect
+      navigate('/admindashboard/aprofile');
+      return;
+    } catch (adminErr) {
+      // ❌ If admin fails → try worker
     }
 
-  };
+    // 🔥 Try WORKER login
+    const data = await workerService.login(formData.email, formData.password);
+
+    const { accessToken, refreshToken, worker } = data;
+
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('worker', JSON.stringify({ ...worker, role: "worker" }));
+
+    window.dispatchEvent(new Event("storage"));
+
+    navigate('/cedashboard/ceprofile'); // ✅ worker redirect
+
+  } catch (err) {
+    const errorMsg =
+      err.response?.data?.error || "Invalid credentials (Admin/Worker)";
+    setError(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 flex items-center justify-center px-4">

@@ -19,7 +19,12 @@ const customerService = {
   updateCustomerStatus : async (id, status) => {
   const res = await api.put(`/customers/status/${id}`, { status });
   return res.data;
-}
+},
+
+customerListWithPassword: async () => {
+    const response = await api.get('/customers/getall-with-password');
+    return response.data;
+},
 
 
   

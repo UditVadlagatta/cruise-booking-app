@@ -1,35 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { bkService } from "../../services/bookingService";
 import { cruiseService } from "../../services/cruiseService";
-import { FaShip, FaSearch, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaSyncAlt, FaUsers } from "react-icons/fa";
+import {
+  FaShip, FaSearch, FaCalendarAlt,
+  FaCheckCircle, FaTimesCircle, FaSyncAlt,
+  FaUsers, FaChevronDown, FaCheck
+} from "react-icons/fa";
 
 const CEBookingStatus = () => {
   const bookingApi = bkService();
-  const cruiseApi = cruiseService();
+  const cruiseApi  = cruiseService();
 
   const today = new Date().toISOString().split("T")[0];
 
-  const [travelDate, setTravelDate] = useState(today);
-  const [cruiseId, setCruiseId] = useState("");
-  const [cruises, setCruises] = useState([]);
-  const [statusData, setStatusData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [travelDate,  setTravelDate]  = useState(today);
+  const [cruiseId,    setCruiseId]    = useState("");
+  const [cruises,     setCruises]     = useState([]);
+  const [statusData,  setStatusData]  = useState([]);
+  const [loading,     setLoading]     = useState(false);
+  const [dropOpen,    setDropOpen]    = useState(false);
 
+  const dropRef = useRef(null);
+
+  // Close dropdown on outside click
   useEffect(() => {
-    fetchCruises();
+    const handler = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) {
+        setDropOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
-    fetchStatus();
-  }, [travelDate, cruiseId]);
+  useEffect(() => { fetchCruises(); }, []);
+  useEffect(() => { fetchStatus();  }, [travelDate, cruiseId]);
 
   const fetchCruises = async () => {
     try {
       const res = await cruiseApi.getAllCruises();
-      if (Array.isArray(res)) setCruises(res);
+      if      (Array.isArray(res))         setCruises(res);
       else if (Array.isArray(res.cruises)) setCruises(res.cruises);
-      else if (Array.isArray(res.data)) setCruises(res.data);
-      else setCruises([]);
+      else if (Array.isArray(res.data))    setCruises(res.data);
+      else                                 setCruises([]);
     } catch (err) {
       console.error("Cruise fetch error:", err);
       setCruises([]);
@@ -43,9 +56,9 @@ const CEBookingStatus = () => {
       const params = { travelDate };
       if (cruiseId !== "") params.cruiseId = cruiseId;
       const res = await bookingApi.status(params);
-      if (Array.isArray(res)) setStatusData(res);
-      else if (res) setStatusData([res]);
-      else setStatusData([]);
+      if      (Array.isArray(res)) setStatusData(res);
+      else if (res)                setStatusData([res]);
+      else                         setStatusData([]);
     } catch (error) {
       console.error("Status fetch error:", error);
     } finally {
@@ -53,9 +66,19 @@ const CEBookingStatus = () => {
     }
   };
 
+  const selectedCruiseName = cruiseId
+    ? cruises.find((c) => c._id === cruiseId)?.name || "All Cruises"
+    : "All Cruises";
+
+  const dropOptions = [
+    { _id: "", name: "All Cruises" },
+    ...cruises,
+  ];
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 antialiased bg-slate-50 min-h-screen">
-      {/* Header Section */}
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-3">
@@ -64,7 +87,7 @@ const CEBookingStatus = () => {
           </h2>
           <p className="text-sm md:text-base text-slate-500">Live occupancy tracking</p>
         </div>
-        
+
         <button
           onClick={fetchStatus}
           disabled={loading}
@@ -75,9 +98,11 @@ const CEBookingStatus = () => {
         </button>
       </div>
 
-      {/* Filters Card - Sticky on Mobile */}
+      {/* Filters Card */}
       <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 sticky top-2 z-10 md:static">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          {/* Date picker */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 px-1">
               <FaCalendarAlt /> Date
@@ -86,29 +111,78 @@ const CEBookingStatus = () => {
               type="date"
               value={travelDate}
               onChange={(e) => setTravelDate(e.target.value)}
-              className="w-full border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm py-2.5"
+              className="w-full border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm py-2.5 px-3"
             />
           </div>
 
-          <div className="space-y-1.5">
+          {/* Custom vessel dropdown */}
+          <div className="space-y-1.5" ref={dropRef}>
             <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 px-1">
               <FaShip /> Vessel
             </label>
-            <select
-              value={cruiseId}
-              onChange={(e) => setCruiseId(e.target.value)}
-              className="w-full border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm py-2.5"
-            >
-              <option value="">All Cruises</option>
-              {cruises.map((cruise) => (
-                <option key={cruise._id} value={cruise._id}>{cruise.name}</option>
-              ))}
-            </select>
+
+            <div className="relative">
+              {/* Trigger */}
+              <button
+                type="button"
+                onClick={() => setDropOpen((o) => !o)}
+                className="w-full flex items-center justify-between gap-2 border border-slate-200 rounded-xl text-sm py-2.5 px-3 bg-white hover:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              >
+                <span className="flex items-center gap-2 text-slate-700 font-medium truncate">
+                  <FaShip className="text-blue-400 shrink-0 text-xs" />
+                  {selectedCruiseName}
+                </span>
+                <FaChevronDown
+                  className={`text-slate-400 text-xs shrink-0 transition-transform duration-200 ${
+                    dropOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Dropdown panel */}
+              {dropOpen && (
+                <div className="absolute z-50 mt-1.5 w-full bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                  <ul className="py-1 max-h-56 overflow-y-auto">
+                    {dropOptions.map((cruise) => {
+                      const isSelected = cruise._id === cruiseId;
+                      return (
+                        <li key={cruise._id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCruiseId(cruise._id);
+                              setDropOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors ${
+                              isSelected
+                                ? "bg-blue-600 text-white font-semibold"
+                                : "text-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2 truncate">
+                              <FaShip
+                                className={`shrink-0 text-xs ${
+                                  isSelected ? "text-blue-200" : "text-slate-300"
+                                }`}
+                              />
+                              {cruise.name}
+                            </span>
+                            {isSelected && (
+                              <FaCheck className="shrink-0 text-xs text-white" />
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Quick Stats Helper (Hidden on mobile) */}
+          {/* Auto-sync info (desktop only) */}
           <div className="hidden lg:flex bg-blue-50 p-3 rounded-xl items-center gap-3 border border-blue-100">
-            <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
+            <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md shrink-0">
               <FaUsers />
             </div>
             <div>
@@ -116,18 +190,19 @@ const CEBookingStatus = () => {
               <p className="text-sm text-blue-800 font-medium">Monitoring Bookings</p>
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* Content */}
       {loading ? (
         <div className="bg-white rounded-2xl border border-slate-200 py-20 flex flex-col items-center">
-          <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+          <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4" />
           <p className="text-slate-400 text-sm animate-pulse">Syncing with manifest...</p>
         </div>
       ) : statusData.length > 0 ? (
         <>
-          {/* Desktop Table View (Hidden on Mobile) */}
+          {/* Desktop Table */}
           <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left">
               <thead>
@@ -140,7 +215,7 @@ const CEBookingStatus = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {statusData.filter(d => d.bookedSeats >= 1).map((data, idx) => (
+                {statusData.filter((d) => d.bookedSeats >= 1).map((data, idx) => (
                   <tr key={idx} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4">
                       <p className="font-bold text-slate-800">{data.cruiseName}</p>
@@ -158,9 +233,9 @@ const CEBookingStatus = () => {
             </table>
           </div>
 
-          {/* Mobile Card View (Hidden on Desktop) */}
+          {/* Mobile Cards */}
           <div className="md:hidden space-y-4">
-            {statusData.filter(d => d.bookedSeats >= 1).map((data, idx) => (
+            {statusData.filter((d) => d.bookedSeats >= 1).map((data, idx) => (
               <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -169,11 +244,10 @@ const CEBookingStatus = () => {
                   </div>
                   <StatusBadge available={data.availableSeats} />
                 </div>
-                
                 <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-50">
-                  <Stat label="Total" value={data.capacity} />
-                  <Stat label="Booked" value={data.bookedSeats} highlight />
-                  <Stat label="Free" value={data.availableSeats} />
+                  <Stat label="Total"  value={data.capacity}      />
+                  <Stat label="Booked" value={data.bookedSeats}   highlight />
+                  <Stat label="Free"   value={data.availableSeats} />
                 </div>
               </div>
             ))}
@@ -186,8 +260,7 @@ const CEBookingStatus = () => {
   );
 };
 
-// Sub-components for cleaner code
-const StatusBadge = ({ available }) => (
+const StatusBadge = ({ available }) =>
   available > 0 ? (
     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-green-50 text-green-600 border border-green-100 uppercase tracking-tighter">
       <FaCheckCircle /> Available
@@ -196,13 +269,12 @@ const StatusBadge = ({ available }) => (
     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-red-50 text-red-600 border border-red-100 uppercase tracking-tighter">
       <FaTimesCircle /> Full
     </span>
-  )
-);
+  );
 
 const Stat = ({ label, value, highlight }) => (
   <div className="text-center">
     <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{label}</p>
-    <p className={`text-lg font-mono font-bold ${highlight ? 'text-blue-600' : 'text-slate-700'}`}>{value}</p>
+    <p className={`text-lg font-mono font-bold ${highlight ? "text-blue-600" : "text-slate-700"}`}>{value}</p>
   </div>
 );
 
@@ -212,7 +284,9 @@ const EmptyState = () => (
       <FaSearch className="text-slate-300 text-xl" />
     </div>
     <h3 className="text-slate-800 font-bold">No Records Found</h3>
-    <p className="text-slate-500 text-sm max-w-[200px] mx-auto mt-1">Try changing the date or checking another vessel.</p>
+    <p className="text-slate-500 text-sm max-w-[200px] mx-auto mt-1">
+      Try changing the date or checking another vessel.
+    </p>
   </div>
 );
 

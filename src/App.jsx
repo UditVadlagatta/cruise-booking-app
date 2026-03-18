@@ -22,7 +22,6 @@ import CELogin from "./api/companyEmployee/pages/CELogin";
 import CESignup from "./api/companyEmployee/pages/CESignup";
 import CESubNavbar from "./api/companyEmployee/pages/CESubNavbar";
 import CEProfilePage from "./api/companyEmployee/CESubNavbarPages/CEProfilePage";
-import { div } from "framer-motion/client";
 import CECruisePage from "./api/companyEmployee/CESubNavbarPages/CECruisePage";
 import UpdateCruise from "./api/companyEmployee/pages/UpdateCruise";
 import AddCruise from "./api/companyEmployee/pages/AddCruise";
@@ -33,28 +32,36 @@ import CECustomerBkEdit from "./api/companyEmployee/pages/customerBkEdit/CECusto
 import CEOpenCruise from "./api/companyEmployee/pages/CEOpenCruise";
 import CEAllBookings from "./api/companyEmployee/pages/CEAllBookings";
 import CEUserDashboard from "./api/companyEmployee/CESubNavbarPages/CEUserDashboard";
-// import CECruiseStatus from "./api/companyEmployee/CESubNavbarPages/CEBookingStatus";
 import CEBookingStatus from "./api/companyEmployee/CESubNavbarPages/CEBookingStatus";
-// import CustomerBkEdit from "./api/companyEmployee/pages/CustomerBkEdit/CustomerBkEdit";
-// import CustomerBkEdit from "./api/companyEmployee/pages/customerBkEdit/CustomerBkEdit";
+import AdminProfilePage from "./admin/casubnavbar/rightside/AdminProfilePage";
+import CASubnavbar from "./admin/CASubnavbar";
+import Feedback from "./subNavbarPages/Feedback";
+import FeedbackSection from "./api/companyEmployee/pages/feedbacksForUser/FeedbackSection";
+// import UserList from "./admin/casubnavbar/rightside/UserList";
+import WorkerList from "./admin/casubnavbar/rightside/WorkerList";
+import ContactPage from "./api/companyEmployee/pages/ContactPage";
 
 function App() {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
-    return savedUser && savedUser !== "undefined" ? JSON.parse(savedUser) : null;
+    return savedUser && savedUser !== "undefined"
+      ? JSON.parse(savedUser)
+      : null;
   });
 
   const [worker, setWorker] = useState(() => {
     const savedWorker = localStorage.getItem("worker");
-    return savedWorker && savedWorker !== "undefined" ? JSON.parse(savedWorker) : null;
+    return savedWorker && savedWorker !== "undefined"
+      ? JSON.parse(savedWorker)
+      : null;
   });
 
-  const isLoggedIn = !!user;
-  const isWorkerLoggedIn = !!worker;
-  const role = user?.role;
+  // 🔥 Unified auth
+  const auth = user || worker;
+  const role = auth?.role;
 
   const handleLogout = () => {
-    localStorage.clear(); // Clears everything at once
+    localStorage.clear();
     setUser(null);
     setWorker(null);
   };
@@ -63,9 +70,19 @@ function App() {
     const handleStorage = () => {
       const updatedUser = localStorage.getItem("user");
       const updatedWorker = localStorage.getItem("worker");
-      setUser(updatedUser && updatedUser !== "undefined" ? JSON.parse(updatedUser) : null);
-      setWorker(updatedWorker && updatedWorker !== "undefined" ? JSON.parse(updatedWorker) : null);
+
+      setUser(
+        updatedUser && updatedUser !== "undefined"
+          ? JSON.parse(updatedUser)
+          : null
+      );
+      setWorker(
+        updatedWorker && updatedWorker !== "undefined"
+          ? JSON.parse(updatedWorker)
+          : null
+      );
     };
+
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
@@ -75,43 +92,62 @@ function App() {
       <Navbar user={user} worker={worker} onLogout={handleLogout} />
 
       <Routes>
-        {/* --- PUBLIC ROUTES --- */}
+        {/* PUBLIC */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* --- AUTH ROUTES: DEFINED ONCE WITH REDIRECT LOGIC --- */}
-        
-        {/* Customer Auth */}
-<Route 
-  path="/login" 
-  element={
-    isLoggedIn ? <Navigate to="/dashboard/profile" replace /> : 
-    (isWorkerLoggedIn ? <Navigate to="/cedashboard/ceprofile" replace /> : <Login />)
-  } 
-/>
-<Route 
-  path="/signup" 
-  element={
-    isLoggedIn ? <Navigate to="/dashboard/profile" replace /> : 
-    (isWorkerLoggedIn ? <Navigate to="/cedashboard/ceprofile" replace /> : <Signup />)
-  } 
-/>
+        {/* CUSTOMER AUTH */}
+        <Route
+          path="/login"
+          element={
+            auth
+              ? role === "admin"
+                ? <Navigate to="/admindashboard/aprofile" replace />
+                : role === "worker"
+                ? <Navigate to="/cedashboard/ceprofile" replace />
+                : <Navigate to="/dashboard/profile" replace />
+              : <Login />
+          }
+        />
 
-{/* Worker Auth */}
-<Route 
-  path="/celogin" 
-  element={
-    isWorkerLoggedIn ? <Navigate to="/cedashboard/ceprofile" replace /> : 
-    (isLoggedIn ? <Navigate to="/dashboard/profile" replace /> : <CELogin />)
-  } 
-/>
-<Route 
-  path="/cesignup" 
-  element={isWorkerLoggedIn ? <Navigate to="/cedashboard/ceprofile" replace /> : <CESignup />} 
-/>
+        <Route
+          path="/signup"
+          element={
+            auth
+              ? role === "admin"
+                ? <Navigate to="/admindashboard/aprofile" replace />
+                : role === "worker"
+                ? <Navigate to="/cedashboard/ceprofile" replace />
+                : <Navigate to="/dashboard/profile" replace />
+              : <Signup />
+          }
+        />
 
-        {/* --- CUSTOMER PROTECTED AREA --- */}
+        {/* WORKER + ADMIN AUTH */}
+        <Route
+          path="/celogin"
+          element={
+            auth
+              ? role === "admin"
+                ? <Navigate to="/admindashboard/aprofile" replace />
+                : <Navigate to="/cedashboard/ceprofile" replace />
+              : <CELogin />
+          }
+        />
+
+        <Route
+          path="/cesignup"
+          element={
+            auth
+              ? role === "admin"
+                ? <Navigate to="/admindashboard/aprofile" replace />
+                : <Navigate to="/cedashboard/ceprofile" replace />
+              : <CESignup />
+          }
+        />
+
+        {/* CUSTOMER */}
         <Route element={<ProtectedRoute role="customer" />}>
           <Route path="/dashboard" element={<SubNavbar />}>
             <Route index element={<Navigate to="profile" replace />} />
@@ -123,38 +159,69 @@ function App() {
             <Route path="booking-cruise" element={<BookingCruise />} />
             <Route path="payment/:bookingCode" element={<PaymentBookingCruise />} />
             <Route path="invoice" element={<Invoice />} />
+             <Route path="ce-feedback" element={<Feedback/>} />
           </Route>
         </Route>
 
-        {/* --- WORKER PROTECTED AREA --- */}
+        {/* WORKER */}
         <Route element={<ProtectedRoute role="worker" />}>
           <Route path="/cedashboard" element={<CESubNavbar worker={worker} />}>
             <Route index element={<Navigate to="ceprofile" replace />} />
             <Route path="ceprofile" element={<CEProfilePage />} />
-            <Route path="cecustomerlist" element={ <CustomerList/> } /> 
-            <Route path="cecruiselist" element={<CECruisePage/>} />
-            <Route path="cecruiselist/update-cruise" element={<UpdateCruise/>} />
-            <Route path="cecruiselist/open-cruise" element={<CEOpenCruise/>} />
-            <Route path="cecruiselist/add-cruise" element={<AddCruise/>} />
+            <Route path="cecustomerlist" element={<CustomerList />} />
 
-            <Route path="cecustomerlist/cecustomer-booking" element={<CECustomerBooking/>}/>
-            <Route path="cecustomerlist/cecustomer-edit" element={<CECustomerEdit/>}/>
-            <Route path="cecustomerlist/cecustomer-booking-edit" element={<CECustomerBkEdit/>}/>
+            <Route path="cecruiselist" element={<CECruisePage />} />
+            <Route path="cecruiselist/update-cruise" element={<UpdateCruise />} />
+            <Route path="cecruiselist/open-cruise" element={<CEOpenCruise />} />
+            <Route path="cecruiselist/add-cruise" element={<AddCruise />} />
 
-            <Route path="ce-all-bookings" element={<CEAllBookings/>} />
-
-            <Route path="ce-customer-dashboard" element={<CEUserDashboard/>} />
-
-            <Route path="ce-cruise-status" element={<CEBookingStatus/>} />
+            <Route path="cecustomerlist/cecustomer-booking" element={<CECustomerBooking />} />
+            <Route path="cecustomerlist/cecustomer-edit" element={<CECustomerEdit />} />
+            <Route path="cecustomerlist/cecustomer-booking-edit" element={<CECustomerBkEdit />} />
 
 
-            
+            <Route path="ce-all-bookings" element={<CEAllBookings />} />
+            <Route path="ce-customer-dashboard" element={<CEUserDashboard />} />
+            <Route path="ce-cruise-status" element={<CEBookingStatus />} />
+          <Route path="ce-feedbacks" element={<FeedbackSection />} />
+          <Route path="ce-contact" element={<ContactPage/>} />
 
-            
+          
+
           </Route>
         </Route>
 
-        {/* Catch-all */}
+        {/* ADMIN */}
+        <Route element={<ProtectedRoute role="admin" />}>
+          <Route path="/admindashboard" element={<CASubnavbar worker={worker} />}>
+            <Route index element={<Navigate to="aprofile" replace />} />
+            <Route path="aprofile" element={<AdminProfilePage />} />
+            <Route path="a-customer-dashboard" element={<CEUserDashboard />} />
+
+            <Route path="a-cruiselist" element={<CECruisePage />} />
+            <Route path="a-cruiselist/update-cruise" element={<UpdateCruise />} />
+            <Route path="a-cruiselist/open-cruise" element={<CEOpenCruise />} />
+            <Route path="a-cruiselist/add-cruise" element={<AddCruise />} />
+
+            <Route path="a-all-bookings" element={<CEAllBookings />} />
+
+            <Route path="acustomerlist" element={<CustomerList />} />
+            <Route path="acustomerlist/acustomer-booking" element={<CECustomerBooking />} />
+            <Route path="acustomerlist/acustomer-edit" element={<CECustomerEdit />} />
+            <Route path="acustomerlist/acustomer-booking-edit" element={<CECustomerBkEdit />} />
+
+            <Route path="auser" element={<WorkerList/>} />
+
+            {/* <Route path="a-all-bookings" element={<CEAllBookings />} /> */}
+            <Route path="a-customer-dashboard" element={<CEUserDashboard />} />
+            <Route path="a-cruise-status" element={<CEBookingStatus />} />
+          <Route path="a-feedbacks" element={<FeedbackSection />} />
+
+          <Route path="a-contact" element={<ContactPage/>} />
+          </Route>
+        </Route>
+
+        {/* NOT FOUND */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
