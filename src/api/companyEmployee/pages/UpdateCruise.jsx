@@ -290,13 +290,13 @@ const UpdateCruise = () => {
               Discard Changes
             </button>
             <div className="flex gap-4">
-              <button 
-                type="submit" 
-                {/* <button type="button" onClick={() => navigate(-1)}  */}
-                className="px-12 py-4 bg-blue-600 text-white rounded-2xl text-xs font-black hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95 uppercase tracking-[0.2em]"
-              >
-                Sync Data & Update
-              </button>
+              // FIXED:
+<button 
+  type="submit" 
+  className="px-12 py-4 bg-blue-600 text-white rounded-2xl text-xs font-black hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95 uppercase tracking-[0.2em]"
+>
+  Sync Data & Update
+</button>
             </div>
           </div>
         </form>
