@@ -288,7 +288,7 @@ const CustomerList = () => {
                 </div>
 
                 {/* Active/inactive toggle — admin only */}
-                {role === 'admin' && role === 'worker' && (
+                {role === 'admin' || role === 'worker' && (
                   <div className="shrink-0 pt-0.5">
                     <Toggle
                       checked={custs.status === 'ACTIVE'}
