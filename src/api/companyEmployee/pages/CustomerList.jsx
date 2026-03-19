@@ -300,7 +300,7 @@ const CustomerList = () => {
 
               {/* Bottom: Book button + Delete (admin only) */}
               <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
-                </button> */}
+                
                 {role === 'worker' &&(
                   <button
                   onClick={e => {
