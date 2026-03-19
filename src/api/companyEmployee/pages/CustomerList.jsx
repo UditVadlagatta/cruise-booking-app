@@ -300,7 +300,23 @@ const CustomerList = () => {
 
               {/* Bottom: Book button + Delete (admin only) */}
               <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
-                <button
+                </button> */}
+                {role === 'worker' &&(
+                  <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate('/cedashboard/cecustomerlist/cecustomer-booking', { state: { custs } });
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-bold py-2.5 rounded-xl transition-all duration-150 shadow-sm shadow-blue-200"
+                >
+                  <BookIcon />
+                  Book for this customer
+                </button>
+                )}
+
+                {role === 'admin' && (
+                  <>
+                  <button
                   onClick={e => {
                     e.stopPropagation();
                     navigate('/admindashboard/acustomerlist/acustomer-booking', { state: { custs } });
@@ -311,8 +327,7 @@ const CustomerList = () => {
                   Book for this customer
                 </button>
 
-                {role === 'admin' && (
-                  <button
+                <button
                     onClick={e => {
                       e.stopPropagation();
                       deleteCustomer(custs._id);
@@ -323,6 +338,7 @@ const CustomerList = () => {
                     <TrashIcon />
                     Delete
                   </button>
+                  </>
                 )}
               </div>
             </div>
